@@ -35,7 +35,7 @@ select,input{width:100%;min-height:46px;margin-top:4px;border:1px solid var(--l)
 </head>
 <body>
 <div class="w">
-<div class="note"><strong>Mode banc :</strong> sauvegarde après chaque action + point automatique toutes les 5 minutes.</div>
+<div class="note"><strong>Mode banc :</strong> sauvegarde après chaque action + point automatique toutes les 5 minutes.<br><span class="tiny"><strong>Version 3.0</strong> — écran de préparation forcé pour tout nouveau match.</span></div>
 
 <section id="setupScreen" class="card s">
   <h3>⚙️ Préparer le match</h3>
@@ -74,18 +74,18 @@ select,input{width:100%;min-height:46px;margin-top:4px;border:1px solid var(--l)
 <section class="s g3"><button id="half">⏸ Mi-temps</button><button id="save">💾 Sauver</button><button id="undo">↩ Annuler</button></section>
 <section class="card s"><h3>📊 Stats</h3><div id="stats" class="lineup"></div></section>
 <section class="card s"><h3>📋 Fil du match</h3><div id="feed" class="feed"><div class="tiny">Aucun événement.</div></div></section>
-<section class="card s"><h3>⚙️ Match</h3><div class="g2"><button id="editSetup">✏️ Modifier la compo</button><button id="exp">⬇️ Export</button></div><button id="reset" class="s" style="width:100%">Nouveau match</button><div class="tiny s">Toutes les données restent sur cet appareil.</div></section>
+<section class="card s"><h3>⚙️ Match</h3><button id="prepareNew" class="p" style="width:100%">🧩 PRÉPARER UN NOUVEAU MATCH</button><div class="g2 s"><button id="editSetup">✏️ Modifier la compo</button><button id="exp">⬇️ Export</button></div><button id="reset" class="s" style="width:100%">Nouveau match</button><div class="tiny s">Toutes les données restent sur cet appareil.</div></section>
 </section>
 </div>
 
 <script>
 (()=>{'use strict';
-const $=s=>document.querySelector(s),K='asv-state-v5',KS='asv-snaps-v5',KR='asv-roster-v1';
+const $=s=>document.querySelector(s),K='asv-state-v6',KS='asv-snaps-v6',KR='asv-roster-v2';
 const defaultRoster=['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO','BICHE','HUGO','VIVIEN','KIERIAN','SEBO','BILAL','MARV'];
 const d=()=>({home:0,away:0,period:1,seconds:0,running:false,opponent:'FC PARON 1',system:'1-3-2-1',onField:['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO'],bench:['BICHE','HUGO','VIVIEN','KIERIAN'],positions:{ROMAIN:'Gardien',FREDO:'Défense',COCO:'Défense',BOBO:'Défense',ALEXIS:'Milieu',JORDAN:'Milieu',LÉO:'Pointe'},events:[],goals:{},assists:{},cscFor:0,cscAgainst:{},lastAuto:0,lastSaved:null,setupDone:false});
 const get=k=>{try{return localStorage.getItem(k)}catch(e){return null}},set=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 let roster;try{roster=JSON.parse(get(KR))||defaultRoster.slice()}catch(e){roster=defaultRoster.slice()}
-let st;try{st=JSON.parse(get(K))||d()}catch(e){st=d()}st.running=false;let timer=null;
+let st;try{st=JSON.parse(get(K))||d()}catch(e){st=d()}if(typeof st.setupDone!=='boolean')st.setupDone=false;st.running=false;let timer=null;
 const pad=n=>String(n).padStart(2,'0'),ct=()=>pad(Math.floor(st.seconds/60))+':'+pad(st.seconds%60);
 const em=()=>{const m=Math.floor(st.seconds/60);if(st.period===1&&st.seconds>2400)return '40+'+Math.max(1,m-40);if(st.period===2&&st.seconds>4800)return '80+'+Math.max(1,m-80);return String(m)};
 function persist(reason='action',snap=false){st.lastSaved=new Date().toISOString();set(K,JSON.stringify(st));set(KR,JSON.stringify(roster));if(snap){let a=[];try{a=JSON.parse(get(KS)||'[]')}catch(e){}a.push({at:st.lastSaved,reason,state:JSON.parse(JSON.stringify(st))});while(a.length>30)a.shift();set(KS,JSON.stringify(a))}renderSave()}
@@ -132,6 +132,7 @@ validateSetup.addEventListener('click',()=>{
 });
 addBench.addEventListener('click',()=>{st.bench.push('');renderSetup()});
 addRoster.addEventListener('click',()=>{const n=prompt('Nom du joueur ?');if(!n)return;const x=n.trim().toUpperCase();if(x&&!roster.includes(x)){roster.push(x);set(KR,JSON.stringify(roster));renderSetup()}});
+prepareNew.addEventListener('click',()=>{if(!confirm('Préparer un nouveau match ? Le match en cours restera exportable avant réinitialisation.'))return;stop();const keepRoster=roster.slice();st=d();roster=keepRoster;st.setupDone=false;persist('prepare-new',true);half.disabled=false;render()});
 editSetup.addEventListener('click',()=>{if(st.seconds>0||st.events.length){if(!confirm('Modifier la composition en cours de match ?'))return}st.setupDone=false;persist('edit-setup',true);render()});
 
 cb.addEventListener('click',()=>st.running?stop():start());

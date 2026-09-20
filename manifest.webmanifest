@@ -1,10 +1,11 @@
 {
   "name": "Suivi match AS VILLEROY",
   "short_name": "Suivi ASV",
-  "start_url": "./",
+  "start_url": "./?v=3",
   "display": "standalone",
   "background_color": "#f5f7fb",
   "theme_color": "#0a2a5e",
+  "description": "Suivi match AS VILLEROY v3 avec préparation de composition et sauvegardes locales.",
   "icons": [
     {
       "src": "villeroy-logo.jpeg",
