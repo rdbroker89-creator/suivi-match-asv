@@ -1,4 +1,4 @@
-const CACHE='asv-v3';
+const CACHE='asv-v4';
 const CORE=['./','./index.html','./manifest.webmanifest','./villeroy-logo.jpeg'];
 
 self.addEventListener('install', event => {

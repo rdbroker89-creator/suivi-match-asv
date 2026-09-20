@@ -35,7 +35,7 @@ select,input{width:100%;min-height:46px;margin-top:4px;border:1px solid var(--l)
 </head>
 <body>
 <div class="w">
-<div class="note"><strong>Mode banc :</strong> sauvegarde après chaque action + point automatique toutes les 5 minutes.<br><span class="tiny"><strong>Version 3.0</strong> — écran de préparation forcé pour tout nouveau match.</span></div>
+<div class="note"><strong>Mode banc :</strong> sauvegarde après chaque action + point automatique toutes les 5 minutes.<br><span class="tiny"><strong>Version 4.0</strong> — sélections buteur/passeur stables pendant le chrono.</span></div>
 
 <section id="setupScreen" class="card s">
   <h3>⚙️ Préparer le match</h3>
@@ -65,7 +65,7 @@ select,input{width:100%;min-height:46px;margin-top:4px;border:1px solid var(--l)
 <section class="s g2"><button id="gu" class="goal">⚽ BUT VILLEROY</button><button id="ga" class="goal">🥅 BUT ADVERSE</button><button id="cfor">CSC ADVERSE</button><button id="cagainst">CSC VILLEROY</button></section>
 <section class="s g2"><button id="sub">🔄 Changement</button><button id="swap">↔️ Permutation</button></section>
 
-<section id="gp" class="card s panel"><h3>⚽ But Villeroy</h3><div class="g2"><label>Buteur<select id="sc"></select></label><label>Passeur<select id="pa"></select></label></div><div class="g2 s"><button data-x="gp">Annuler</button><button id="sg" class="p">Valider</button></div></section>
+<section id="gp" class="card s panel"><h3>⚽ But Villeroy</h3><div class="g2"><label>Buteur<select id="sc"></select></label><label>Passeur<select id="pa"></select></label></div><div class="g2 s"><button data-x="gp">Annuler</button><button id="sg" class="p">Valider</button></div><div id="goalWarn" class="warn"></div></section>
 <section id="cp" class="card s panel"><h3>🥅 CSC Villeroy</h3><label>Joueur<select id="cpl"></select></label><div class="g2 s"><button data-x="cp">Annuler</button><button id="scsc" class="p">Valider</button></div></section>
 <section id="sp" class="card s panel"><h3>🔄 Changement</h3><div class="g2"><label>Sortant<select id="out"></select></label><label>Entrant<select id="inn"></select></label></div><div class="g2 s"><button data-x="sp">Annuler</button><button id="ssub" class="p">Valider</button></div></section>
 <section id="wp" class="card s panel"><h3>↔️ Permutation</h3><div class="g2"><label>Joueur 1<select id="a"></select></label><label>Joueur 2<select id="b"></select></label></div><div class="g2 s"><button data-x="wp">Annuler</button><button id="sswap" class="p">Valider</button></div></section>
@@ -80,7 +80,7 @@ select,input{width:100%;min-height:46px;margin-top:4px;border:1px solid var(--l)
 
 <script>
 (()=>{'use strict';
-const $=s=>document.querySelector(s),K='asv-state-v6',KS='asv-snaps-v6',KR='asv-roster-v2';
+const $=s=>document.querySelector(s),K='asv-state-v7',KS='asv-snaps-v7',KR='asv-roster-v3';
 const defaultRoster=['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO','BICHE','HUGO','VIVIEN','KIERIAN','SEBO','BILAL','MARV'];
 const d=()=>({home:0,away:0,period:1,seconds:0,running:false,opponent:'FC PARON 1',system:'1-3-2-1',onField:['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO'],bench:['BICHE','HUGO','VIVIEN','KIERIAN'],positions:{ROMAIN:'Gardien',FREDO:'Défense',COCO:'Défense',BOBO:'Défense',ALEXIS:'Milieu',JORDAN:'Milieu',LÉO:'Pointe'},events:[],goals:{},assists:{},cscFor:0,cscAgainst:{},lastAuto:0,lastSaved:null,setupDone:false});
 const get=k=>{try{return localStorage.getItem(k)}catch(e){return null}},set=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
@@ -114,7 +114,7 @@ function renderSetup(){
 function refs(){sc.innerHTML=opts(st.onField,'Choisir');pa.innerHTML=opts(st.onField,'Aucun / choisir');cpl.innerHTML=opts(st.onField,'Choisir');out.innerHTML=opts(st.onField,'Sortant');inn.innerHTML=opts(st.bench,'Entrant');a.innerHTML=opts(st.onField,'Joueur 1');b.innerHTML=opts(st.onField,'Joueur 2')}
 function render(){if(st.setupDone){setupScreen.classList.add('hidden');matchScreen.classList.remove('hidden')}else{setupScreen.classList.remove('hidden');matchScreen.classList.add('hidden');renderSetup();return}
 hs.textContent=st.home;as.textContent=st.away;clk.textContent=ct();per.textContent=st.period===1?'1re MI-TEMPS':'2e MI-TEMPS';cb.textContent=st.running?'⏸ Pause':'▶ '+(st.seconds?'Reprendre':'Démarrer');half.textContent=st.period===1?'⏸ Mi-temps':'🏁 Fin match';oppLab.textContent=st.opponent||'ADVERSAIRE';systemLabel.textContent=st.system||'—';
-lu.innerHTML=st.onField.map(p=>'<div><strong>'+p+'</strong> <span class="pill">'+(st.positions[p]||'Poste')+'</span></div>').join('');bench.textContent=st.bench.join(' • ');refs();
+lu.innerHTML=st.onField.map(p=>'<div><strong>'+p+'</strong> <span class="pill">'+(st.positions[p]||'Poste')+'</span></div>').join('');bench.textContent=st.bench.join(' • ');
 let names=new Set([...Object.keys(st.goals),...Object.keys(st.assists),...Object.keys(st.cscAgainst)]),h=[...names].map(p=>'<div><strong>'+p+'</strong> '+((st.goals[p]||0)?'⚽ '+st.goals[p]+' ':'')+((st.assists[p]||0)?'🎯 '+st.assists[p]+' ':'')+((st.cscAgainst[p]||0)?'CSC '+st.cscAgainst[p]:'')+'</div>').join('');if(st.cscFor)h+='<div><strong>CSC adverse</strong> ⚽ '+st.cscFor+'</div>';stats.innerHTML=h||'<div class="tiny">Aucune statistique.</div>';feed.innerHTML=st.events.length?st.events.slice().reverse().map(e=>'<div class="ev"><span>'+e.text+'</span><span class="min">'+e.minute+"'</span></div>").join(''):'<div class="tiny">Aucun événement.</div>';renderSave()}
 function ev(type,text,x={}){st.events.push({type,text,minute:em(),seconds:st.seconds,period:st.period,...x});persist('action',true);render()}
 function close(){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('show'))}
@@ -136,12 +136,12 @@ prepareNew.addEventListener('click',()=>{if(!confirm('Préparer un nouveau match
 editSetup.addEventListener('click',()=>{if(st.seconds>0||st.events.length){if(!confirm('Modifier la composition en cours de match ?'))return}st.setupDone=false;persist('edit-setup',true);render()});
 
 cb.addEventListener('click',()=>st.running?stop():start());
-gu.addEventListener('click',()=>{close();gp.classList.add('show')});ga.addEventListener('click',()=>{st.away++;ev('against','🥅 But '+st.opponent,{side:'away'})});cfor.addEventListener('click',()=>{st.home++;st.cscFor++;ev('csc-for','⚽ CSC '+st.opponent,{side:'home'})});cagainst.addEventListener('click',()=>{close();cp.classList.add('show')});sub.addEventListener('click',()=>{close();sp.classList.add('show')});swap.addEventListener('click',()=>{close();wp.classList.add('show')});
+gu.addEventListener('click',()=>{refs();close();gp.classList.add('show')});ga.addEventListener('click',()=>{st.away++;ev('against','🥅 But '+st.opponent,{side:'away'})});cfor.addEventListener('click',()=>{st.home++;st.cscFor++;ev('csc-for','⚽ CSC '+st.opponent,{side:'home'})});cagainst.addEventListener('click',()=>{refs();close();cp.classList.add('show')});sub.addEventListener('click',()=>{refs();close();sp.classList.add('show')});swap.addEventListener('click',()=>{refs();close();wp.classList.add('show')});
 document.querySelectorAll('[data-x]').forEach(x=>x.addEventListener('click',()=>$('#'+x.dataset.x).classList.remove('show')));
-sg.addEventListener('click',()=>{const s=sc.value,p=pa.value;if(!s)return;st.home++;st.goals[s]=(st.goals[s]||0)+1;if(p)st.assists[p]=(st.assists[p]||0)+1;close();ev('goal','⚽ <strong>'+s+'</strong>'+(p?' ← '+p:''),{side:'home',scorer:s,assist:p})});
+sg.addEventListener('click',()=>{const s=sc.value,p=pa.value;if(!s){goalWarn.textContent='Choisis le buteur.';return}goalWarn.textContent='';st.home++;st.goals[s]=(st.goals[s]||0)+1;if(p)st.assists[p]=(st.assists[p]||0)+1;close();ev('goal','⚽ <strong>'+s+'</strong>'+(p?' ← '+p:''),{side:'home',scorer:s,assist:p})});
 scsc.addEventListener('click',()=>{const p=cpl.value;if(!p)return;st.away++;st.cscAgainst[p]=(st.cscAgainst[p]||0)+1;close();ev('csc-against','🥅 <strong>'+p+'</strong> (CSC)',{side:'away',player:p})});
-ssub.addEventListener('click',()=>{const o=out.value,i=inn.value;if(!o||!i)return;const ix=st.onField.indexOf(o);if(ix<0)return;const pos=st.positions[o]||'Poste';st.onField[ix]=i;st.bench=st.bench.filter(x=>x!==i);st.bench.push(o);st.positions[i]=pos;close();ev('sub','🔄 <strong>'+o+'</strong> sort • <strong>'+i+'</strong> entre',{out:o,inn:i,oldPos:pos})});
-sswap.addEventListener('click',()=>{const x=a.value,y=b.value;if(!x||!y||x===y)return;const px=st.positions[x],py=st.positions[y];st.positions[x]=py;st.positions[y]=px;close();ev('swap','↔️ <strong>'+x+'</strong> ↔ <strong>'+y+'</strong>',{a:x,b:y,pa:px,pb:py})});
+ssub.addEventListener('click',()=>{const o=out.value,i=inn.value;if(!o||!i)return;const ix=st.onField.indexOf(o);if(ix<0)return;const pos=st.positions[o]||'Poste';st.onField[ix]=i;st.bench=st.bench.filter(x=>x!==i);st.bench.push(o);st.positions[i]=pos;close();ev('sub','🔄 <strong>'+o+'</strong> sort • <strong>'+i+'</strong> entre',{out:o,inn:i,oldPos:pos});refs()});
+sswap.addEventListener('click',()=>{const x=a.value,y=b.value;if(!x||!y||x===y)return;const px=st.positions[x],py=st.positions[y];st.positions[x]=py;st.positions[y]=px;close();ev('swap','↔️ <strong>'+x+'</strong> ↔ <strong>'+y+'</strong>',{a:x,b:y,pa:px,pb:py});refs()});
 half.addEventListener('click',()=>{if(st.period===1){stop();st.period=2;st.seconds=2400;st.lastAuto=2400;ev('half','⏸ 2e mi-temps — reprise à 40:00')}else{stop();ev('finish','🏁 FIN DU MATCH — '+st.home+'–'+st.away);half.disabled=true}});
 save.addEventListener('click',()=>{persist('manual',true);render()});
 undo.addEventListener('click',()=>{const e=st.events.pop();if(!e)return;if(e.type==='goal'){st.home=Math.max(0,st.home-1);st.goals[e.scorer]=Math.max(0,(st.goals[e.scorer]||0)-1);if(e.assist)st.assists[e.assist]=Math.max(0,(st.assists[e.assist]||0)-1)}else if(e.type==='against')st.away=Math.max(0,st.away-1);else if(e.type==='csc-for'){st.home=Math.max(0,st.home-1);st.cscFor=Math.max(0,st.cscFor-1)}else if(e.type==='csc-against'){st.away=Math.max(0,st.away-1);st.cscAgainst[e.player]=Math.max(0,(st.cscAgainst[e.player]||0)-1)}else if(e.type==='sub'){const ix=st.onField.indexOf(e.inn);if(ix>=0)st.onField[ix]=e.out;st.bench=st.bench.filter(x=>x!==e.out);if(!st.bench.includes(e.inn))st.bench.push(e.inn);st.positions[e.out]=e.oldPos}else if(e.type==='swap'){st.positions[e.a]=e.pa;st.positions[e.b]=e.pb}persist('undo',true);render()});
