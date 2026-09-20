@@ -1,4 +1,13 @@
-AS VILLEROY - Suivi Match PWA
+AS VILLEROY - Suivi Match PWA v2
+
+Nouveauté :
+- écran "Préparer le match"
+- choix libre des 7 titulaires
+- choix libre des remplaçants
+- poste modifiable pour chaque titulaire
+- adversaire et système modifiables
+- ajout de joueurs au groupe directement dans l'app
+- modification de la composition depuis l'app
 
 Fonctions :
 - score + chrono 2x40
@@ -6,9 +15,8 @@ Fonctions :
 - reprise seconde mi-temps à 40:00
 - buteurs/passeurs/CSC
 - changements et permutations
-- composition et banc
 - sauvegarde à chaque action
 - sauvegarde automatique toutes les 5 minutes
-- sauvegarde quand l'iPhone passe en arrière-plan
+- sauvegarde lors de la mise en arrière-plan
 - export JSON
-- fonctionnement hors ligne après installation
+- hors ligne après installation
