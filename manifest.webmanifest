@@ -1,0 +1,16 @@
+{
+  "name": "Suivi match AS VILLEROY",
+  "short_name": "Suivi ASV",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#0a2a5e",
+  "icons": [
+    {
+      "src": "villeroy-logo.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
