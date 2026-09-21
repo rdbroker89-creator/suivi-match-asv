@@ -39,11 +39,44 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 .hidden{display:none!important}.warn{color:var(--warn);font-size:12px;font-weight:900;margin-top:8px}
 #validateSetup,#prepareNew{font-size:16px;min-height:54px}#setupScreen>h3{font-size:21px}#reset{color:var(--danger)}
 @media(max-width:520px){.setup-grid,.player-row,.lineup{grid-template-columns:1fr}.score{font-size:48px}.clock{font-size:31px}.top{padding:12px 9px}button.goal{min-height:68px;font-size:17px}}
+
+.pitch-wrap{margin-top:12px}
+.pitch-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.pitch-system{font-size:11px;font-weight:1000;color:#0b67c7;background:#e8f5ff;padding:5px 8px;border-radius:999px}
+.pitch{
+  position:relative;width:100%;aspect-ratio:7/9;max-height:420px;overflow:hidden;
+  border-radius:20px;border:3px solid rgba(255,255,255,.95);
+  background:
+    linear-gradient(90deg,transparent 49.4%,rgba(255,255,255,.72) 49.4%,rgba(255,255,255,.72) 50.6%,transparent 50.6%),
+    repeating-linear-gradient(0deg,#159447 0,#159447 12.5%,#11883f 12.5%,#11883f 25%);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),0 8px 22px rgba(15,23,42,.09)
+}
+.pitch:before{
+  content:"";position:absolute;left:50%;top:50%;width:25%;aspect-ratio:1;
+  border:2px solid rgba(255,255,255,.72);border-radius:50%;transform:translate(-50%,-50%)
+}
+.pitch:after{
+  content:"";position:absolute;left:12%;right:12%;top:3%;bottom:3%;
+  border:2px solid rgba(255,255,255,.72);border-radius:2px;pointer-events:none
+}
+.player-dot{
+  position:absolute;transform:translate(-50%,-50%);min-width:66px;max-width:100px;
+  padding:6px 7px;border-radius:999px;background:#fff;color:#082b5c;
+  border:2px solid #34d5ff;box-shadow:0 5px 12px rgba(0,0,0,.18);
+  font-size:11px;font-weight:1000;text-align:center;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;z-index:3
+}
+.player-dot.gk{background:#fff6cf;border-color:#f7c948}
+.pitch-goal{position:absolute;left:37%;width:26%;height:5%;border:2px solid rgba(255,255,255,.85);z-index:1}
+.pitch-goal.top{top:3%;border-bottom:0}.pitch-goal.bottom{bottom:3%;border-top:0}
+.pitch-bench{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bench-chip{font-size:11px;font-weight:900;padding:6px 9px;border-radius:999px;background:#eef4ff;color:#334155;border:1px solid #dbe7f3}
+
 </style>
 </head>
 <body>
 <div class="w">
-<div class="note"><strong>Mode banc :</strong> sauvegarde après chaque action + point automatique toutes les 5 minutes.<br><span class="tiny"><strong>Version 5.0</strong> — sélections buteur/passeur stables pendant le chrono.</span></div>
+<div class="note"><strong>Mode banc :</strong> sauvegarde après chaque action + point automatique toutes les 5 minutes.<br><span class="tiny"><strong>Version 6.0</strong> — sélections buteur/passeur stables pendant le chrono.</span></div>
 
 <section id="setupScreen" class="card s">
   <h3>🔥 Préparer le match</h3>
@@ -78,7 +111,14 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 <section id="sp" class="card s panel"><h3>🔄 Changement</h3><div class="g2"><label>Sortant<select id="out"></select></label><label>Entrant<select id="inn"></select></label></div><div class="g2 s"><button data-x="sp">Annuler</button><button id="ssub" class="p">Valider</button></div></section>
 <section id="wp" class="card s panel"><h3>↔️ Permutation</h3><div class="g2"><label>Joueur 1<select id="a"></select></label><label>Joueur 2<select id="b"></select></label></div><div class="g2 s"><button data-x="wp">Annuler</button><button id="sswap" class="p">Valider</button></div></section>
 
-<section class="card s"><h3>👟 Équipe sur le terrain</h3><div class="tiny">Système : <span id="systemLabel"></span></div><div id="lu" class="lineup s"></div><div class="tiny s">Banc : <span id="bench"></span></div></section>
+<section class="card s"><h3>👟 Équipe sur le terrain</h3>
+<div class="tiny">Système : <span id="systemLabel"></span></div>
+<div id="lu" class="lineup s"></div><div class="tiny s">Banc : <span id="bench"></span></div>
+<div class="pitch-wrap">
+  <div class="pitch-title"><strong>🟢 Placement live</strong><span id="pitchSystem" class="pitch-system"></span></div>
+  <div id="pitch" class="pitch"><div class="pitch-goal top"></div><div class="pitch-goal bottom"></div></div>
+  <div id="pitchBench" class="pitch-bench"></div>
+</div></section>
 <section class="s g3"><button id="half">⏸ Mi-temps</button><button id="save">💾 Sauver</button><button id="undo">↩ Annuler</button></section>
 <section class="card s"><h3>📈 Stats live</h3><div id="stats" class="lineup"></div></section>
 <section class="card s"><h3>⚡ Fil du match</h3><div id="feed" class="feed"><div class="tiny">Aucun événement.</div></div></section>
@@ -88,7 +128,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 
 <script>
 (()=>{'use strict';
-const $=s=>document.querySelector(s),K='asv-state-v8',KS='asv-snaps-v8',KR='asv-roster-v4';
+const $=s=>document.querySelector(s),K='asv-state-v9',KS='asv-snaps-v9',KR='asv-roster-v5';
 const defaultRoster=['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO','BICHE','HUGO','VIVIEN','KIERIAN','SEBO','BILAL','MARV'];
 const d=()=>({home:0,away:0,period:1,seconds:0,running:false,opponent:'FC PARON 1',system:'1-3-2-1',onField:['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO'],bench:['BICHE','HUGO','VIVIEN','KIERIAN'],positions:{ROMAIN:'Gardien',FREDO:'Défense',COCO:'Défense',BOBO:'Défense',ALEXIS:'Milieu',JORDAN:'Milieu',LÉO:'Pointe'},events:[],goals:{},assists:{},cscFor:0,cscAgainst:{},lastAuto:0,lastSaved:null,setupDone:false});
 const get=k=>{try{return localStorage.getItem(k)}catch(e){return null}},set=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
@@ -120,9 +160,41 @@ function renderSetup(){
   });
 }
 function refs(){sc.innerHTML=opts(st.onField,'Choisir');pa.innerHTML=opts(st.onField,'Aucun / choisir');cpl.innerHTML=opts(st.onField,'Choisir');out.innerHTML=opts(st.onField,'Sortant');inn.innerHTML=opts(st.bench,'Entrant');a.innerHTML=opts(st.onField,'Joueur 1');b.innerHTML=opts(st.onField,'Joueur 2')}
+
+function pitchPosition(player,index){
+  const pos=(st.positions[player]||'').toLowerCase();
+  if(pos.includes('gard')) return {x:50,y:88,cls:'gk'};
+  if(pos.includes('pointe')||pos.includes('attaq')||pos.includes('avant')) return {x:50,y:17,cls:''};
+  if(pos.includes('milieu')){
+    const mids=st.onField.filter(p=>(st.positions[p]||'').toLowerCase().includes('milieu'));
+    const i=mids.indexOf(player),n=mids.length;
+    const xs=n<=1?[50]:n==2?[34,66]:n==3?[22,50,78]:[18,39,61,82];
+    return {x:xs[Math.max(0,i)]||50,y:45,cls:''};
+  }
+  if(pos.includes('déf')||pos.includes('def')||pos.includes('arrière')||pos.includes('arriere')){
+    const defs=st.onField.filter(p=>{const q=(st.positions[p]||'').toLowerCase();return q.includes('déf')||q.includes('def')||q.includes('arrière')||q.includes('arriere')});
+    const i=defs.indexOf(player),n=defs.length;
+    const xs=n<=1?[50]:n==2?[34,66]:n==3?[22,50,78]:[18,39,61,82];
+    return {x:xs[Math.max(0,i)]||50,y:70,cls:''};
+  }
+  const fallback=[{x:25,y:58},{x:50,y:58},{x:75,y:58},{x:30,y:32},{x:70,y:32}];
+  return {...(fallback[index%fallback.length]),cls:''};
+}
+function renderPitch(){
+  if(!document.getElementById('pitch'))return;
+  pitchSystem.textContent=st.system||'';
+  pitch.querySelectorAll('.player-dot').forEach(n=>n.remove());
+  st.onField.forEach((p,i)=>{
+    const xy=pitchPosition(p,i),d=document.createElement('div');
+    d.className='player-dot '+xy.cls;d.style.left=xy.x+'%';d.style.top=xy.y+'%';d.textContent=p;
+    pitch.appendChild(d);
+  });
+  pitchBench.innerHTML=st.bench.map(p=>'<span class="bench-chip">'+p+'</span>').join('');
+}
+
 function render(){if(st.setupDone){setupScreen.classList.add('hidden');matchScreen.classList.remove('hidden')}else{setupScreen.classList.remove('hidden');matchScreen.classList.add('hidden');renderSetup();return}
 hs.textContent=st.home;as.textContent=st.away;clk.textContent=ct();per.textContent=st.period===1?'1re MI-TEMPS':'2e MI-TEMPS';cb.textContent=st.running?'⏸ Pause':'▶ '+(st.seconds?'Reprendre':'Démarrer');half.textContent=st.period===1?'⏸ Mi-temps':'🏁 Fin match';oppLab.textContent=st.opponent||'ADVERSAIRE';systemLabel.textContent=st.system||'—';
-lu.innerHTML=st.onField.map(p=>'<div><strong>'+p+'</strong> <span class="pill">'+(st.positions[p]||'Poste')+'</span></div>').join('');bench.textContent=st.bench.join(' • ');
+lu.innerHTML=st.onField.map(p=>'<div><strong>'+p+'</strong> <span class="pill">'+(st.positions[p]||'Poste')+'</span></div>').join('');bench.textContent=st.bench.join(' • ');renderPitch();
 let names=new Set([...Object.keys(st.goals),...Object.keys(st.assists),...Object.keys(st.cscAgainst)]),h=[...names].map(p=>'<div><strong>'+p+'</strong> '+((st.goals[p]||0)?'⚽ '+st.goals[p]+' ':'')+((st.assists[p]||0)?'🎯 '+st.assists[p]+' ':'')+((st.cscAgainst[p]||0)?'CSC '+st.cscAgainst[p]:'')+'</div>').join('');if(st.cscFor)h+='<div><strong>CSC adverse</strong> ⚽ '+st.cscFor+'</div>';stats.innerHTML=h||'<div class="tiny">Aucune statistique.</div>';feed.innerHTML=st.events.length?st.events.slice().reverse().map(e=>'<div class="ev"><span>'+e.text+'</span><span class="min">'+e.minute+"'</span></div>").join(''):'<div class="tiny">Aucun événement.</div>';renderSave()}
 function ev(type,text,x={}){st.events.push({type,text,minute:em(),seconds:st.seconds,period:st.period,...x});persist('action',true);render()}
 function close(){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('show'))}
