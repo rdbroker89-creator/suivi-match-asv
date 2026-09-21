@@ -1,11 +1,11 @@
 {
   "name": "Suivi match AS VILLEROY",
   "short_name": "Suivi ASV",
-  "start_url": "./?v=4",
+  "start_url": "./?v=5",
   "display": "standalone",
   "background_color": "#f5f7fb",
   "theme_color": "#0a2a5e",
-  "description": "Suivi match AS VILLEROY v4 : sélections buteur/passeur corrigées, préparation de composition et sauvegardes locales.",
+  "description": "Suivi match AS VILLEROY v5 : interface plus jeune, rapide et mobile.",
   "icons": [
     {
       "src": "villeroy-logo.jpeg",

@@ -1,29 +1,19 @@
-AS VILLEROY - Suivi Match PWA v4
+AS VILLEROY - Suivi Match PWA v5
 
-CORRECTION PRINCIPALE
-- Le choix du buteur et du passeur ne disparaît plus pendant que le chrono tourne.
-- Cause corrigée : les listes de sélection étaient recréées chaque seconde par le rafraîchissement du chrono.
-- Les listes sont maintenant rafraîchies uniquement à l'ouverture d'une action ou après un changement de joueurs.
-- Message d'erreur visible si aucun buteur n'est choisi.
+NOUVEAU LOOK
+- interface plus jeune et moderne
+- bleu vif, cyan et marine
+- gros boutons plus lisibles
+- cartes arrondies
+- score et chrono plus visibles
+- écran de préparation plus clair
+- stats et fil du match plus dynamiques
 
-Fonctions conservées
-- préparation du match
-- 7 titulaires, remplaçants et postes modifiables
-- score + chrono 2x40
-- 40+1, 40+2...
-- reprise seconde mi-temps à 40:00
-- buts, passeurs, CSC
-- changements et permutations
-- sauvegarde à chaque action
-- sauvegarde automatique toutes les 5 minutes
-- sauvegarde lors du passage en arrière-plan
-- export JSON
-- fonctionnement hors ligne après installation
+Toutes les fonctions de la v4 sont conservées, y compris la correction buteur/passeur.
 
 MISE À JOUR
-1. Remplacer les fichiers du dépôt GitHub par ceux de ce ZIP.
+1. Remplacer les fichiers GitHub par ceux du ZIP.
 2. Commit changes.
-3. Attendre le redéploiement GitHub Pages.
-4. Ouvrir le site dans Safari.
-5. Vérifier que "Version 4.0" s'affiche.
-6. Si l'ancienne version persiste, supprimer l'icône de l'écran d'accueil puis la recréer après rechargement dans Safari.
+3. Attendre GitHub Pages.
+4. Vérifier "Version 5.0" dans Safari.
+5. Réinstaller l'icône sur l'écran d'accueil si nécessaire.
