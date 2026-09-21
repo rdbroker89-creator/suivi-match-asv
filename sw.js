@@ -1,5 +1,5 @@
-const CACHE='asv-v7';
-const CORE=['./','./index.html','./manifest.webmanifest','./villeroy-logo.jpeg'];
+const CACHE='asv-v9';
+const CORE=['./','./index.html','./manifest.webmanifest','./villeroy-logo.jpeg','./coach.jpeg'];
 
 self.addEventListener('install',event=>{
   self.skipWaiting();

@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#082b5c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Suivi ASV">
+<meta name="apple-mobile-web-app-title" content="Coach Rémy ASV">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="villeroy-logo.jpeg">
-<title>Suivi match AS VILLEROY</title>
+<title>Coach Rémy ASV</title>
 <style>
 :root{
   --navy:#082b5c;--blue:#1188ff;--cyan:#34d5ff;--ink:#0f172a;--muted:#64748b;
@@ -130,16 +130,77 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
   .score{font-size:45px}.clock{font-size:30px}.top{padding:12px 8px}
   button.goal{min-height:67px;font-size:17px}
 }
+
+.splash{
+  position:fixed;inset:0;z-index:9999;background:#061a35;
+  display:flex;align-items:center;justify-content:center;padding:18px;
+  transition:opacity .35s ease,visibility .35s ease;
+}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-card{
+  width:min(440px,100%);height:min(760px,92vh);border-radius:28px;overflow:hidden;
+  position:relative;box-shadow:0 24px 70px rgba(0,0,0,.35);background:#082b5c;
+}
+.splash-card img{width:100%;height:100%;object-fit:cover;display:block}
+.splash-overlay{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:22px;background:linear-gradient(180deg,rgba(3,17,36,.05) 40%,rgba(3,17,36,.88) 100%);
+  color:#fff
+}
+.splash-title{font-size:30px;font-weight:1000;letter-spacing:-.03em}
+.splash-sub{font-size:13px;color:#d9efff;margin-top:4px}
+.splash-skip{
+  position:absolute;top:14px;right:14px;z-index:2;min-height:40px;padding:7px 10px;
+  border-radius:999px;background:rgba(255,255,255,.92);color:#082b5c
+}
+.coach-bar{
+  display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;
+  background:rgba(255,255,255,.93);border:1px solid #fff;border-radius:18px;
+  box-shadow:0 8px 20px rgba(15,23,42,.06)
+}
+.coach-avatar{
+  width:46px;height:46px;border-radius:50%;overflow:hidden;flex:0 0 auto;
+  border:2px solid #34d5ff;box-shadow:0 3px 10px rgba(8,43,92,.15)
+}
+.coach-avatar img{width:100%;height:100%;object-fit:cover;object-position:center 38%;transform:scale(1.35)}
+.coach-copy{min-width:0}
+.coach-name{font-size:15px;font-weight:1000;color:#082b5c}
+.coach-role{font-size:11px;color:#64748b;font-weight:800}
+
 </style>
 </head>
 <body>
+
+<div id="splash" class="splash">
+  <div class="splash-card">
+    <button id="splashSkip" class="splash-skip">Passer</button>
+    <img src="coach.jpeg" alt="Coach Rémy ASV">
+    <div class="splash-overlay">
+      <div class="splash-title">Coach Rémy ASV</div>
+      <div class="splash-sub">Préparer • Coacher • Suivre • Analyser</div>
+    </div>
+  </div>
+</div>
+
 <div class="w">
   <div class="note">
-    <strong>AS VILLEROY — Suivi Match</strong><br>
-    <span class="tiny"><strong>Version 7.0</strong> — préparation, tactique libre, terrain live et résumé partageable.</span>
+    <strong>Coach Rémy ASV</strong><br>
+    <span class="tiny"><strong>Version 9.0</strong> — préparation, tactique libre, terrain live et résumé partageable.</span>
+  </div>
+  <div class="coach-bar">
+    <div class="coach-avatar"><img src="coach.jpeg" alt="Coach Rémy"></div>
+    <div class="coach-copy">
+      <div class="coach-name">Coach Rémy ASV</div>
+      <div class="coach-role">PARON / VILLEROY 2 • Suivi de match</div>
+    </div>
   </div>
 
   <section id="setupScreen" class="card s">
+    <div id="resumeBanner" class="hidden" style="margin-bottom:12px;padding:12px;border-radius:16px;background:#eaf7ff;border:1px solid #b9defa">
+      <strong>⚽ Match en cours sauvegardé</strong>
+      <div class="tiny s" id="resumeText"></div>
+      <button id="resumeMatch" class="p s" style="width:100%">▶ Reprendre le match en cours</button>
+    </div>
     <h3>🔥 Préparer le match</h3>
 
     <div class="subhead">1. Le match</div>
@@ -225,7 +286,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
     <div id="setupPitch" class="pitch">
       <div class="pitch-goal top"></div><div class="pitch-goal bottom"></div>
     </div>
-    <div class="preview-help">Maintiens une pastille et déplace-la avec le doigt pour ajuster ton placement.</div>
+    <div class="preview-help">Déplace les joueurs de champ avec le doigt. 🔒 Le gardien reste fixe dans les buts.</div>
 
     <div id="setupWarn" class="warn"></div>
     <div class="g2 s">
@@ -307,7 +368,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
         <div id="pitch" class="pitch">
           <div class="pitch-goal top"></div><div class="pitch-goal bottom"></div>
         </div>
-        <div class="preview-help">Tu peux déplacer un joueur directement pendant le match. Le changement tactique sera mémorisé.</div>
+        <div class="preview-help">Tu peux déplacer les joueurs de champ pendant le match. 🔒 Le gardien reste fixe dans les buts.</div>
         <div id="pitchBench" class="pitch-bench"></div>
       </div>
     </section>
@@ -344,7 +405,13 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 </div>
 
 <script>
+
 (()=>{'use strict';
+const splash=document.getElementById('splash');
+const splashSkip=document.getElementById('splashSkip');
+let splashTimer=setTimeout(()=>{if(splash)splash.classList.add('hide')},1800);
+if(splashSkip)splashSkip.addEventListener('click',()=>{clearTimeout(splashTimer);splash.classList.add('hide')});
+
 
 const $=s=>document.querySelector(s);
 const TEAM='PARON / VILLEROY 2';
@@ -407,6 +474,7 @@ let roster;try{roster=JSON.parse(getLocal(KR))||DEFAULT_ROSTER.slice()}catch(e){
 let st;try{st=JSON.parse(getLocal(K))||defaultState()}catch(e){st=defaultState()}
 st.running=false;
 let timer=null;
+let freshOpen=true;
 let setupCoords={};
 
 const pad=n=>String(n).padStart(2,'0');
@@ -506,8 +574,8 @@ function renderSetupPitch(){
     const xy=setupCoords[p]||{x:base[i][0],y:base[i][1]};
     const d=document.createElement('div');
     d.className='player-dot '+(i===0?'gk':'');
-    d.dataset.player=p;d.style.left=xy.x+'%';d.style.top=xy.y+'%';d.textContent=p;
-    bindDrag(d,p,pitch,(coord)=>{setupCoords[p]=coord});
+    d.dataset.player=p;d.style.left=xy.x+'%';d.style.top=xy.y+'%';d.textContent=(i===0?'🔒 ':'')+p;
+    if(i!==0)bindDrag(d,p,pitch,(coord)=>{setupCoords[p]=coord});
     pitch.appendChild(d);
   });
 }
@@ -578,9 +646,10 @@ function renderLivePitch(){
   pitch.querySelectorAll('.player-dot').forEach(n=>n.remove());
   st.onField.forEach((p,i)=>{
     const xy=st.coords[p]||{x:50,y:50};
-    const d=document.createElement('div');d.className='player-dot '+(i===0?'gk':'');
-    d.dataset.player=p;d.style.left=xy.x+'%';d.style.top=xy.y+'%';d.textContent=p;
-    bindDrag(d,p,pitch,(coord)=>{st.coords[p]=coord});
+    const isGK=(st.positions[p]||'').toLowerCase().includes('gard');
+    const d=document.createElement('div');d.className='player-dot '+(isGK?'gk':'');
+    d.dataset.player=p;d.style.left=xy.x+'%';d.style.top=xy.y+'%';d.textContent=(isGK?'🔒 ':'')+p;
+    if(!isGK)bindDrag(d,p,pitch,(coord)=>{st.coords[p]=coord});
     pitch.appendChild(d);
   });
   $('#pitchBench').innerHTML=st.bench.map(p=>'<span class="bench-chip">'+p+'</span>').join('');
@@ -592,8 +661,9 @@ function refreshActionSelectors(){
   $('#cpl').innerHTML=opts(st.onField,'Choisir');
   $('#out').innerHTML=opts(st.onField,'Sortant');
   $('#inn').innerHTML=opts(st.bench,'Entrant');
-  $('#a').innerHTML=opts(st.onField,'Joueur 1');
-  $('#b').innerHTML=opts(st.onField,'Joueur 2');
+  const movable=st.onField.filter(p=>!(st.positions[p]||'').toLowerCase().includes('gard'));
+  $('#a').innerHTML=opts(movable,'Joueur 1');
+  $('#b').innerHTML=opts(movable,'Joueur 2');
 }
 function renderStats(){
   const names=new Set([...Object.keys(st.goals),...Object.keys(st.assists),...Object.keys(st.cscAgainst)]);
@@ -612,8 +682,25 @@ function renderFeed(){
 function renderSummaryPreview(){$('#summaryPreview').textContent=buildSummary()}
 
 function render(){
+  const hasActivity=st.seconds>0||st.events.length>0;
+  const finished=st.events.some(e=>e.type==='finish');
+  if(freshOpen){
+    freshOpen=false;
+    if(!hasActivity || finished || (st.setupDone && st.seconds===0 && st.events.length===0)){
+      st.setupDone=false;
+    }else if(st.setupDone && hasActivity && !finished){
+      $('#setupScreen').classList.remove('hidden');$('#matchScreen').classList.add('hidden');
+      renderSetup();
+      $('#resumeBanner').classList.remove('hidden');
+      const so=scoreOrder();
+      $('#resumeText').textContent=so.leftTeam+' '+so.leftScore+' - '+so.rightScore+' '+so.rightTeam+' • '+clockText();
+      return;
+    }
+  }
   if(!st.setupDone){
-    $('#setupScreen').classList.remove('hidden');$('#matchScreen').classList.add('hidden');renderSetup();return;
+    $('#setupScreen').classList.remove('hidden');$('#matchScreen').classList.add('hidden');renderSetup();
+    $('#resumeBanner').classList.add('hidden');
+    return;
   }
   $('#setupScreen').classList.add('hidden');$('#matchScreen').classList.remove('hidden');
   const so=scoreOrder();
@@ -715,6 +802,13 @@ $('#duplicateLast').addEventListener('click',()=>{
   render();
 });
 
+$('#resumeMatch').addEventListener('click',()=>{
+  st.setupDone=true;
+  $('#resumeBanner').classList.add('hidden');
+  persist('resume',true);
+  render();
+});
+
 $('#validateSetup').addEventListener('click',()=>{
   const sels=selectedStarters().filter(Boolean);
   const posInputs=[...document.querySelectorAll('.starterPos')].map(x=>x.value.trim()||'Poste');
@@ -736,7 +830,7 @@ $('#validateSetup').addEventListener('click',()=>{
   sels.forEach((p,i)=>{
     st.positions[p]=posInputs[i]||roleForSlot(i);
     const base=formationBase(st.formation,st.mentality);
-    const coord=setupCoords[p]||{x:base[i][0],y:base[i][1]};
+    const coord=(i===0)?{x:50,y:89}:(setupCoords[p]||{x:base[i][0],y:base[i][1]});
     st.coords[p]=clone(coord);
   });
   st.initialSetup={
@@ -774,8 +868,9 @@ $('#ssub').addEventListener('click',()=>{
   const out=$('#out').value,inn=$('#inn').value;if(!out||!inn)return;
   const ix=st.onField.indexOf(out);if(ix<0)return;
   const oldPos=st.positions[out]||'Poste',oldCoord=clone(st.coords[out]||{x:50,y:50});
+  const replacingGK=oldPos.toLowerCase().includes('gard');
   st.onField[ix]=inn;st.bench=st.bench.filter(x=>x!==inn);st.bench.push(out);
-  st.positions[inn]=oldPos;st.coords[inn]=oldCoord;
+  st.positions[inn]=oldPos;st.coords[inn]=replacingGK?{x:50,y:89}:oldCoord;
   delete st.coords[out];
   closePanels();addEvent('sub','🔄 <strong>'+out+'</strong> sort • <strong>'+inn+'</strong> entre',{out,inn,oldPos,oldCoord});
 });

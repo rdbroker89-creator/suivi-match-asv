@@ -1,11 +1,11 @@
 {
-  "name": "Suivi match AS VILLEROY",
-  "short_name": "Suivi ASV",
-  "start_url": "./?v=7",
+  "name": "Coach Rémy ASV",
+  "short_name": "Coach Rémy",
+  "start_url": "./?v=9",
   "display": "standalone",
   "background_color": "#eef6ff",
   "theme_color": "#082b5c",
-  "description": "Suivi match AS VILLEROY v7 : préparation avancée, domicile/extérieur, tactique déplaçable, suivi live et résumé partageable.",
+  "description": "Coach Rémy ASV v9 : préparation, tactique, suivi live, statistiques et résumé partageable.",
   "icons": [
     {
       "src": "villeroy-logo.jpeg",
