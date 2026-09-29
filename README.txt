@@ -1,20 +1,21 @@
-COACH RÉMY ASV - Suivi Match PWA v9
+COACH RÉMY ASV - V10 BIS
 
-NOUVEAUTÉS V9
-- Nouveau nom de l'application : Coach Rémy ASV.
-- Écran d'ouverture avec la photo du coach.
-- Bouton "Passer" sur l'écran d'ouverture.
-- La photo reste ensuite visible en miniature ronde dans l'application.
-- Le reste de la V8 est conservé :
-  préparation du match, adversaires Groupe B, domicile/extérieur,
-  tactiques, terrain live, gardien fixe, buts/passeurs, changements,
-  sauvegardes, résumé ChatGPT et export.
+NOUVEAUTÉ
+- Un bouton ✏️ apparaît à droite de chaque but Villeroy dans le fil du match.
+- Il permet de modifier le buteur.
+- Il permet de modifier, ajouter ou supprimer le passeur décisif.
+- Les statistiques buteurs/passeurs sont recalculées automatiquement après correction.
+- La minute et le score ne changent pas lors de cette correction.
 
-MISE À JOUR
-1. Décompresser le ZIP v9.
-2. Remplacer tous les fichiers du dépôt GitHub.
+Conservé depuis la V10
+- correction automatique du score NaN / undefined
+- réparation du score depuis le fil du match
+- Loïc et Tristan dans l'effectif de base
+- préparation, tactique, terrain live, gardien fixe, sauvegardes et résumé ChatGPT
+
+MISE À JOUR GITHUB
+1. Décompresser ce ZIP.
+2. Remplacer les fichiers du dépôt GitHub.
 3. Commit changes.
 4. Attendre le déploiement GitHub Pages.
-5. Ouvrir dans Safari et vérifier "Version 9.0".
-6. Si l'ancienne version reste affichée, supprimer l'icône de l'écran d'accueil,
-   ouvrir l'URL avec ?v=9, puis réinstaller sur l'écran d'accueil.
+5. Ouvrir le site avec ?v=10bis et vérifier "Version 10 bis".

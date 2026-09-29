@@ -1,11 +1,11 @@
 {
   "name": "Coach Rémy ASV",
   "short_name": "Coach Rémy",
-  "start_url": "./?v=9",
+  "start_url": "./?v=10bis",
   "display": "standalone",
   "background_color": "#eef6ff",
   "theme_color": "#082b5c",
-  "description": "Coach Rémy ASV v9 : préparation, tactique, suivi live, statistiques et résumé partageable.",
+  "description": "Coach Rémy ASV v10 bis : correction du score et modification des buteurs/passeurs après saisie.",
   "icons": [
     {
       "src": "villeroy-logo.jpeg",

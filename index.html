@@ -88,7 +88,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 .lineup>div{background:#f8fbff;border:1px solid #edf3f9;border-radius:14px;padding:9px 10px}
 .pill{display:inline-block;font-size:10px;font-weight:900;background:#e8f5ff;color:#0b67c7;padding:4px 7px;border-radius:999px;margin-left:4px}
 .feed{display:flex;flex-direction:column;gap:8px}
-.ev{display:flex;justify-content:space-between;gap:10px;background:#f8fbff;border:1px solid #edf3f9;border-radius:14px;padding:9px 10px}
+.ev{display:flex;justify-content:space-between;gap:10px;background:#f8fbff;border:1px solid #edf3f9;border-radius:14px;padding:9px 10px;align-items:center}.ev-main{flex:1;min-width:0}.ev-actions{display:flex;align-items:center;gap:6px}.edit-ev{min-height:34px;padding:5px 8px;border-radius:10px;font-size:12px}
 .min{white-space:nowrap;color:#0b67c7;font-weight:1000}
 
 .pitch-wrap{margin-top:12px}
@@ -185,7 +185,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 <div class="w">
   <div class="note">
     <strong>Coach Rémy ASV</strong><br>
-    <span class="tiny"><strong>Version 9.0</strong> — préparation, tactique libre, terrain live et résumé partageable.</span>
+    <span class="tiny"><strong>Version 10 bis</strong> — préparation, tactique libre, terrain live et résumé partageable.</span>
   </div>
   <div class="coach-bar">
     <div class="coach-avatar"><img src="coach.jpeg" alt="Coach Rémy"></div>
@@ -328,6 +328,20 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
       <div id="goalWarn" class="warn"></div>
     </section>
 
+
+    <section id="editGoalPanel" class="card s panel">
+      <h3>✏️ Modifier le but</h3>
+      <div class="g2">
+        <label>Buteur<select id="editScorer"></select></label>
+        <label>Passeur<select id="editAssist"></select></label>
+      </div>
+      <div class="g2 s">
+        <button data-x="editGoalPanel">Annuler</button>
+        <button id="saveEditGoal" class="p">Enregistrer</button>
+      </div>
+      <div id="editGoalWarn" class="warn"></div>
+    </section>
+
     <section id="cp" class="card s panel">
       <h3>🥅 CSC Villeroy</h3>
       <label>Joueur<select id="cpl"></select></label>
@@ -398,6 +412,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
         <button id="exp">⬇️ Export JSON</button>
       </div>
       <button id="prepareNew" class="p s" style="width:100%">🧩 PRÉPARER UN NOUVEAU MATCH</button>
+      <button id="repairScore" class="secondary s" style="width:100%">🛠️ Réparer le score depuis le fil du match</button>
       <button id="reset" class="danger s" style="width:100%">Effacer le match courant</button>
       <div class="tiny s">Les données du match restent sur cet appareil jusqu'à ce que tu les effaces.</div>
     </section>
@@ -421,7 +436,7 @@ const KR='asv-roster-v7';
 const KL='asv-last-setup-v7';
 
 const GROUP_TEAMS=['GÂTINAIS 1','MONÉTEAU','LINDRY','BLÉNEAU','BEINES','MAILLY-LA-VILLE','ST-CLÉMENT','APPOIGNY 2','ROSOY'];
-const DEFAULT_ROSTER=['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO','BICHE','HUGO','VIVIEN','KIERIAN','SEBO','BILAL','MARV'];
+const DEFAULT_ROSTER=['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO','BICHE','HUGO','VIVIEN','KIERIAN','SEBO','BILAL','MARV','LOÏC','TRISTAN'];
 
 const FORMATIONS={
   '3-2-1':{
@@ -472,6 +487,36 @@ function setLocal(k,v){try{localStorage.setItem(k,v);return true}catch(e){return
 function clone(v){return JSON.parse(JSON.stringify(v))}
 let roster;try{roster=JSON.parse(getLocal(KR))||DEFAULT_ROSTER.slice()}catch(e){roster=DEFAULT_ROSTER.slice()}
 let st;try{st=JSON.parse(getLocal(K))||defaultState()}catch(e){st=defaultState()}
+
+// Migration / auto-réparation des anciennes versions.
+// Certaines versions stockaient le score sous d'autres clés (home/away),
+// ce qui pouvait produire undefined / NaN après une mise à jour.
+function countScoreFromEvents(){
+  const events=Array.isArray(st.events)?st.events:[];
+  let ours=0,opp=0;
+  for(const e of events){
+    if(!e)continue;
+    if(e.type==='goal'||e.type==='csc-for')ours++;
+    else if(e.type==='against'||e.type==='csc-against')opp++;
+  }
+  return {ours,opp};
+}
+const migrated=countScoreFromEvents();
+if(!Number.isFinite(Number(st.ourScore))){
+  if(Number.isFinite(Number(st.home)) && st.homeAway==='home') st.ourScore=Number(st.home);
+  else if(Number.isFinite(Number(st.away)) && st.homeAway==='away') st.ourScore=Number(st.away);
+  else st.ourScore=migrated.ours;
+}else st.ourScore=Number(st.ourScore);
+if(!Number.isFinite(Number(st.oppScore))){
+  if(Number.isFinite(Number(st.away)) && st.homeAway==='home') st.oppScore=Number(st.away);
+  else if(Number.isFinite(Number(st.home)) && st.homeAway==='away') st.oppScore=Number(st.home);
+  else st.oppScore=migrated.opp;
+}else st.oppScore=Number(st.oppScore);
+// Si une ancienne incrémentation a déjà transformé le score en NaN,
+// les événements restent la source de vérité la plus fiable.
+if(!Number.isFinite(st.ourScore))st.ourScore=migrated.ours;
+if(!Number.isFinite(st.oppScore))st.oppScore=migrated.opp;
+
 st.running=false;
 let timer=null;
 let freshOpen=true;
@@ -493,10 +538,17 @@ function eventMinute(){
 }
 function mentalityText(v){return v==='defensive'?'Défensive':v==='offensive'?'Offensive':'Équilibrée'}
 function formationText(v){return v==='custom'?'Personnalisée':v}
+function safeScore(v,fallback){
+  const n=Number(v);return Number.isFinite(n)?n:fallback;
+}
 function scoreOrder(){
+  const rebuilt=countScoreFromEvents();
+  const ours=safeScore(st.ourScore,rebuilt.ours);
+  const opp=safeScore(st.oppScore,rebuilt.opp);
+  st.ourScore=ours;st.oppScore=opp;
   return st.homeAway==='home'
-    ? {leftTeam:TEAM,rightTeam:st.opponent,leftScore:st.ourScore,rightScore:st.oppScore}
-    : {leftTeam:st.opponent,rightTeam:TEAM,leftScore:st.oppScore,rightScore:st.ourScore};
+    ? {leftTeam:TEAM,rightTeam:st.opponent,leftScore:ours,rightScore:opp}
+    : {leftTeam:st.opponent,rightTeam:TEAM,leftScore:opp,rightScore:ours};
 }
 function persist(reason='action',snapshot=False){
   st.lastSaved=new Date().toISOString();
@@ -665,6 +717,35 @@ function refreshActionSelectors(){
   $('#a').innerHTML=opts(movable,'Joueur 1');
   $('#b').innerHTML=opts(movable,'Joueur 2');
 }
+
+function rebuildPlayerStatsFromEvents(){
+  st.goals={};st.assists={};st.cscFor=0;st.cscAgainst={};
+  st.events.forEach(e=>{
+    if(e.type==='goal'){
+      if(e.scorer)st.goals[e.scorer]=(st.goals[e.scorer]||0)+1;
+      if(e.assist)st.assists[e.assist]=(st.assists[e.assist]||0)+1;
+    }else if(e.type==='csc-for'){
+      st.cscFor=(st.cscFor||0)+1;
+    }else if(e.type==='csc-against' && e.player){
+      st.cscAgainst[e.player]=(st.cscAgainst[e.player]||0)+1;
+    }
+  });
+}
+let editingGoalEventIndex=null;
+
+function openEditGoal(eventIndex){
+  const e=st.events[eventIndex];
+  if(!e || e.type!=='goal')return;
+  editingGoalEventIndex=eventIndex;
+  $('#editScorer').innerHTML=opts(roster,'Choisir');
+  $('#editAssist').innerHTML=opts(roster,'Aucun / choisir');
+  $('#editScorer').value=e.scorer||'';
+  $('#editAssist').value=e.assist||'';
+  $('#editGoalWarn').textContent='';
+  closePanels();
+  $('#editGoalPanel').classList.add('show');
+}
+
 function renderStats(){
   const names=new Set([...Object.keys(st.goals),...Object.keys(st.assists),...Object.keys(st.cscAgainst)]);
   let html=[...names].sort().map(p=>{
@@ -844,8 +925,8 @@ $('#validateSetup').addEventListener('click',()=>{
 
 $('#cb').addEventListener('click',()=>st.running?stopTimer():startTimer());
 $('#gu').addEventListener('click',()=>{refreshActionSelectors();closePanels();$('#gp').classList.add('show')});
-$('#ga').addEventListener('click',()=>{st.oppScore++;addEvent('against','🥅 But '+st.opponent,{side:'opp'})});
-$('#cfor').addEventListener('click',()=>{st.ourScore++;st.cscFor++;addEvent('csc-for','⚽ CSC '+st.opponent,{side:'our'})});
+$('#ga').addEventListener('click',()=>{st.oppScore=safeScore(st.oppScore,countScoreFromEvents().opp)+1;addEvent('against','🥅 But '+st.opponent,{side:'opp'})});
+$('#cfor').addEventListener('click',()=>{st.ourScore=safeScore(st.ourScore,countScoreFromEvents().ours)+1;st.cscFor++;addEvent('csc-for','⚽ CSC '+st.opponent,{side:'our'})});
 $('#cagainst').addEventListener('click',()=>{refreshActionSelectors();closePanels();$('#cp').classList.add('show')});
 $('#sub').addEventListener('click',()=>{refreshActionSelectors();closePanels();$('#sp').classList.add('show')});
 $('#swap').addEventListener('click',()=>{refreshActionSelectors();closePanels();$('#wp').classList.add('show')});
@@ -855,13 +936,31 @@ $('#sg').addEventListener('click',()=>{
   const scorer=$('#sc').value,assist=$('#pa').value;
   if(!scorer){$('#goalWarn').textContent='Choisis le buteur.';return}
   $('#goalWarn').textContent='';
-  st.ourScore++;st.goals[scorer]=(st.goals[scorer]||0)+1;
+  st.ourScore=safeScore(st.ourScore,countScoreFromEvents().ours)+1;st.goals[scorer]=(st.goals[scorer]||0)+1;
   if(assist)st.assists[assist]=(st.assists[assist]||0)+1;
   closePanels();addEvent('goal','⚽ <strong>'+scorer+'</strong>'+(assist?' ← '+assist:''),{side:'our',scorer,assist});
 });
+
+$('#saveEditGoal').addEventListener('click',()=>{
+  if(editingGoalEventIndex===null)return;
+  const scorer=$('#editScorer').value;
+  const assist=$('#editAssist').value;
+  if(!scorer){$('#editGoalWarn').textContent='Choisis le buteur.';return}
+  const e=st.events[editingGoalEventIndex];
+  if(!e || e.type!=='goal')return;
+  e.scorer=scorer;
+  e.assist=assist;
+  e.text='⚽ <strong>'+scorer+'</strong>'+(assist?' ← '+assist:'');
+  rebuildPlayerStatsFromEvents();
+  editingGoalEventIndex=null;
+  closePanels();
+  persist('edit-goal',true);
+  render();
+});
+
 $('#scsc').addEventListener('click',()=>{
   const p=$('#cpl').value;if(!p)return;
-  st.oppScore++;st.cscAgainst[p]=(st.cscAgainst[p]||0)+1;
+  st.oppScore=safeScore(st.oppScore,countScoreFromEvents().opp)+1;st.cscAgainst[p]=(st.cscAgainst[p]||0)+1;
   closePanels();addEvent('csc-against','🥅 <strong>'+p+'</strong> (CSC)',{side:'opp',player:p});
 });
 $('#ssub').addEventListener('click',()=>{
@@ -894,11 +993,11 @@ $('#save').addEventListener('click',()=>{persist('manual',true);render()});
 $('#undo').addEventListener('click',()=>{
   const e=st.events.pop();if(!e)return;
   if(e.type==='goal'){
-    st.ourScore=Math.max(0,st.ourScore-1);st.goals[e.scorer]=Math.max(0,(st.goals[e.scorer]||0)-1);
+    st.ourScore=Math.max(0,safeScore(st.ourScore,countScoreFromEvents().ours)-1);st.goals[e.scorer]=Math.max(0,(st.goals[e.scorer]||0)-1);
     if(e.assist)st.assists[e.assist]=Math.max(0,(st.assists[e.assist]||0)-1);
-  }else if(e.type==='against')st.oppScore=Math.max(0,st.oppScore-1);
-  else if(e.type==='csc-for'){st.ourScore=Math.max(0,st.ourScore-1);st.cscFor=Math.max(0,st.cscFor-1)}
-  else if(e.type==='csc-against'){st.oppScore=Math.max(0,st.oppScore-1);st.cscAgainst[e.player]=Math.max(0,(st.cscAgainst[e.player]||0)-1)}
+  }else if(e.type==='against')st.oppScore=Math.max(0,safeScore(st.oppScore,countScoreFromEvents().opp)-1);
+  else if(e.type==='csc-for'){st.ourScore=Math.max(0,safeScore(st.ourScore,countScoreFromEvents().ours)-1);st.cscFor=Math.max(0,st.cscFor-1)}
+  else if(e.type==='csc-against'){st.oppScore=Math.max(0,safeScore(st.oppScore,countScoreFromEvents().opp)-1);st.cscAgainst[e.player]=Math.max(0,(st.cscAgainst[e.player]||0)-1)}
   else if(e.type==='sub'){
     const ix=st.onField.indexOf(e.inn);if(ix>=0)st.onField[ix]=e.out;
     st.bench=st.bench.filter(x=>x!==e.out);if(!st.bench.includes(e.inn))st.bench.push(e.inn);
@@ -935,6 +1034,13 @@ $('#prepareNew').addEventListener('click',()=>{
   if(!confirm('Préparer un nouveau match ? Le match courant restera stocké jusqu’à validation du nouveau.'))return;
   stopTimer();const keepRoster=roster.slice();st=defaultState();roster=keepRoster;persist('prepare-new',true);$('#half').disabled=false;render();
 });
+$('#repairScore').addEventListener('click',()=>{
+  const rebuilt=countScoreFromEvents();
+  st.ourScore=rebuilt.ours;st.oppScore=rebuilt.opp;
+  persist('repair-score',true);render();
+  alert('Score réparé à partir des événements enregistrés : '+st.ourScore+'–'+st.oppScore);
+});
+
 $('#reset').addEventListener('click',()=>{
   if(!confirm('Effacer complètement le match courant ?'))return;
   stopTimer();st=defaultState();persist('reset',true);$('#half').disabled=false;render();
@@ -944,6 +1050,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)persist('ba
 window.addEventListener('pagehide',()=>persist('pagehide',true));
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 
+rebuildPlayerStatsFromEvents();
 persist('open',false);render();
 
 })();
