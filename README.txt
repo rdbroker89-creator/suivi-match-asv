@@ -1,21 +1,18 @@
-COACH RÉMY ASV - V10 BIS
+COACH RÉMY ASV - V11
 
-NOUVEAUTÉ
-- Un bouton ✏️ apparaît à droite de chaque but Villeroy dans le fil du match.
-- Il permet de modifier le buteur.
-- Il permet de modifier, ajouter ou supprimer le passeur décisif.
-- Les statistiques buteurs/passeurs sont recalculées automatiquement après correction.
-- La minute et le score ne changent pas lors de cette correction.
-
-Conservé depuis la V10
-- correction automatique du score NaN / undefined
-- réparation du score depuis le fil du match
-- Loïc et Tristan dans l'effectif de base
-- préparation, tactique, terrain live, gardien fixe, sauvegardes et résumé ChatGPT
+- Chronomètre persistant : il se recalcule avec l'heure réelle après un passage dans Messages ou une suspension iOS.
+- Il ne s'arrête que sur Pause ou Fin de match.
+- Préparation sans doublons : un joueur choisi disparaît des autres listes.
+- RAPHAËL ajouté à l'effectif permanent, avec LOÏC et TRISTAN.
+- Repositionnements tactiques toujours possibles mais retirés du fil et du résumé.
+- Historique local : jusqu'à 50 matchs terminés archivés sur l'appareil.
+- Les matchs archivés peuvent être rechargés.
+- Les sauvegardes restent locales : supprimer les données Safari du site peut les effacer, donc l'export JSON reste le meilleur secours externe.
+- Toutes les fonctions V10 bis sont conservées, y compris la correction NaN et l'édition buteur/passeur.
 
 MISE À JOUR GITHUB
-1. Décompresser ce ZIP.
-2. Remplacer les fichiers du dépôt GitHub.
+1. Décompresser le ZIP.
+2. Remplacer les fichiers du dépôt.
 3. Commit changes.
-4. Attendre le déploiement GitHub Pages.
-5. Ouvrir le site avec ?v=10bis et vérifier "Version 10 bis".
+4. Attendre GitHub Pages.
+5. Ouvrir avec ?v=11 et vérifier Version 11.0.
