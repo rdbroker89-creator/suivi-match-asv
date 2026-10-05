@@ -185,7 +185,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 <div class="w">
   <div class="note">
     <strong>Coach Rémy ASV</strong><br>
-    <span class="tiny"><strong>Version 11.0</strong> — préparation, tactique libre, terrain live et résumé partageable.</span>
+    <span class="tiny"><strong>Version 11 bis</strong> — préparation, tactique libre, terrain live et résumé partageable.</span>
   </div>
   <div class="coach-bar">
     <div class="coach-avatar"><img src="coach.jpeg" alt="Coach Rémy"></div>
@@ -271,10 +271,10 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 
     <div class="subhead">3. Composition</div>
     <div id="startersSetup"></div>
-    <div class="subhead">Remplaçants</div>
+    <div class="subhead">Remplaçants <span class="tiny">(jusqu’à 4 — à choisir parmi les joueurs restants)</span></div>
     <div id="benchSetup"></div>
     <div class="g2 s">
-      <button id="addBench" class="secondary">+ Ajouter remplaçant</button>
+      <button id="addBench" class="secondary" disabled>4 remplaçants maximum</button>
       <button id="addRoster" class="secondary">+ Ajouter joueur</button>
     </div>
 
@@ -483,7 +483,7 @@ function defaultState(){
     date:new Date().toISOString().slice(0,10),time:'09:30',venue:'Stade de Paron',
     formation:'3-2-1',mentality:'balanced',
     onField:['ROMAIN','FREDO','COCO','BOBO','ALEXIS','JORDAN','LÉO'],
-    bench:['BICHE','HUGO','VIVIEN','KIERIAN'],
+    bench:['','','',''],
     positions:{},coords:{},initialSetup:null,
     events:[],goals:{},assists:{},cscFor:0,cscAgainst:{},
     lastAuto:0,lastClockSave:0,lastSaved:null,clockAnchorMs:null,clockAnchorSeconds:0
@@ -618,12 +618,14 @@ function renderSetupPlayers(){
     $('#startersSetup').appendChild(row);
   }
   $('#benchSetup').innerHTML='';
-  (st.bench||[]).forEach((p,i)=>{
+  const benchSlots=Array.from({length:4},(_,i)=>(st.bench&&st.bench[i])||'');
+  st.bench=benchSlots.slice();
+  benchSlots.forEach((p,i)=>{
     const row=document.createElement('div');row.className='player-row';
-    row.innerHTML='<label>Remplaçant '+(i+1)+'<select class="benchSel">'+opts(roster,'Choisir')+'</select></label><button class="removeBench">Retirer</button>';
+    row.innerHTML='<label>Remplaçant '+(i+1)+'<select class="benchSel">'+opts(roster,'Choisir')+'</select></label><button class="clearBench">Vider</button>';
     row.querySelector('.benchSel').value=p||'';
     row.querySelector('.benchSel').addEventListener('change',refreshPreparationPlayerChoices);
-    row.querySelector('.removeBench').addEventListener('click',()=>{st.bench.splice(i,1);renderSetupPlayers()});
+    row.querySelector('.clearBench').addEventListener('click',()=>{row.querySelector('.benchSel').value='';st.bench[i]='';refreshPreparationPlayerChoices()});
     $('#benchSetup').appendChild(row);
   });
   refreshPreparationPlayerChoices();
@@ -923,7 +925,7 @@ $('#setupFormation').addEventListener('change',()=>{
 $('#setupMentality').addEventListener('change',()=>{rebuildSetupCoordsFromSlots(true);renderSetupPitch()});
 $('#resetSetupPitch').addEventListener('click',()=>{setupCoords={};rebuildSetupCoordsFromSlots(true);renderSetupPitch()});
 
-$('#addBench').addEventListener('click',()=>{st.bench.push('');renderSetupPlayers()});
+$('#addBench').addEventListener('click',()=>{});
 $('#addRoster').addEventListener('click',()=>{
   const n=prompt('Nom du joueur ?');if(!n)return;
   const x=n.trim().toUpperCase();if(x&&!roster.includes(x)){roster.push(x);setLocal(KR,JSON.stringify(roster));renderSetupPlayers()}

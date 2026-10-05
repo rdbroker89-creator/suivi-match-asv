@@ -1,11 +1,11 @@
 {
   "name": "Coach Rémy ASV",
   "short_name": "Coach Rémy",
-  "start_url": "./?v=11",
+  "start_url": "./?v=11bis",
   "display": "standalone",
   "background_color": "#eef6ff",
   "theme_color": "#082b5c",
-  "description": "Coach Rémy ASV v11 : chrono persistant, préparation sans doublons, historique local et suivi tactique allégé.",
+  "description": "Coach Rémy ASV v11 bis : 4 emplacements remplaçants vides à la préparation, choix uniquement parmi les joueurs encore disponibles.",
   "icons": [
     {
       "src": "villeroy-logo.jpeg",
