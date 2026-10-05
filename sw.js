@@ -1,4 +1,4 @@
-const CACHE='coach-remy-asv-v11bis';
+const CACHE='coach-remy-asv-v11ter';
 const CORE=['./','./index.html','./manifest.webmanifest','./villeroy-logo.jpeg','./coach.jpeg'];
 
 self.addEventListener('install',event=>{

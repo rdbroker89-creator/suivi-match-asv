@@ -185,7 +185,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
 <div class="w">
   <div class="note">
     <strong>Coach Rémy ASV</strong><br>
-    <span class="tiny"><strong>Version 11 bis</strong> — préparation, tactique libre, terrain live et résumé partageable.</span>
+    <span class="tiny"><strong>Version 11 ter</strong> — préparation, tactique libre, terrain live et résumé partageable.</span>
   </div>
   <div class="coach-bar">
     <div class="coach-avatar"><img src="coach.jpeg" alt="Coach Rémy"></div>
@@ -336,9 +336,10 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
         <label>Passeur<select id="editAssist"></select></label>
       </div>
       <div class="g2 s">
-        <button data-x="editGoalPanel">Annuler</button>
+        <button data-x="editGoalPanel">Fermer</button>
         <button id="saveEditGoal" class="p">Enregistrer</button>
       </div>
+      <button id="cancelGoalOffside" class="danger s" style="width:100%">🚫 Annuler ce but (hors-jeu / erreur)</button>
       <div id="editGoalWarn" class="warn"></div>
     </section>
 
@@ -394,7 +395,7 @@ select:focus,input:focus{outline:3px solid rgba(17,136,255,.15);border-color:#7b
     </section>
 
     <section class="card s"><h3>📈 Stats live</h3><div id="stats" class="lineup"></div></section>
-    <section class="card s"><h3>⚡ Fil du match</h3><div id="feed" class="feed"></div></section>
+    <section class="card s"><h3>⚡ Fil du match</h3><div class="tiny">✏️ sur un but : modifier buteur/passeur ou annuler le but.</div><div id="feed" class="feed s"></div></section>
 
     <section class="card s">
       <h3>📤 Résumé & affiche finale</h3>
@@ -880,6 +881,7 @@ function buildSummary(){
   const oppGoals=listEvents('against').map(e=>e.minute+"'");
   const cscFor=listEvents('csc-for').map(e=>e.minute+"' CSC "+st.opponent);
   const cscAgainst=listEvents('csc-against').map(e=>e.minute+"' "+e.player+" (CSC)");
+  const cancelledGoals=listEvents('goal-cancelled').map(e=>e.minute+"' "+e.text.replace(/<[^>]*>/g,''));
   const subs=listEvents('sub').map(e=>e.minute+"' "+e.inn+" remplace "+e.out);
   const swaps=listEvents('swap').map(e=>e.minute+"' "+e.a+" ↔ "+e.b);
   const init=st.initialSetup||{};
@@ -900,6 +902,7 @@ function buildSummary(){
     "CSC adverse en faveur de Villeroy : "+(cscFor.length?cscFor.join(' • '):'Aucun'),
     "Buts adverses : "+(oppGoals.length?oppGoals.join(' • '):'Aucun'),
     "CSC Villeroy : "+(cscAgainst.length?cscAgainst.join(' • '):'Aucun'),
+    "Buts annulés : "+(cancelledGoals.length?cancelledGoals.join(' • '):'Aucun'),
     "",
     "Changements : "+(subs.length?subs.join(' • '):'Aucun renseigné'),
     "Permutations : "+(swaps.length?swaps.join(' • '):'Aucune'),
@@ -1009,6 +1012,40 @@ $('#saveEditGoal').addEventListener('click',()=>{
   editingGoalEventIndex=null;
   closePanels();
   persist('edit-goal',true);
+  render();
+});
+
+
+$('#cancelGoalOffside').addEventListener('click',()=>{
+  if(editingGoalEventIndex===null)return;
+  const e=st.events[editingGoalEventIndex];
+  if(!e || e.type!=='goal')return;
+  const scorer=e.scorer||'Buteur';
+  const assist=e.assist||'';
+  const minute=e.minute;
+  if(!confirm("Annuler ce but ? Le score et les statistiques seront corrigés."))return;
+
+  // Remove the goal itself
+  st.events.splice(editingGoalEventIndex,1);
+
+  // Recalculate our score from the event log
+  st.ourScore=st.events.filter(x=>x.type==='goal'||x.type==='csc-for').length;
+
+  // Rebuild scorer/assist statistics
+  rebuildPlayerStatsFromEvents();
+
+  // Add a neutral audit line without affecting score/statistics
+  st.events.push({
+    type:'goal-cancelled',
+    text:'🚫 But annulé'+(scorer?' — <strong>'+scorer+'</strong>':'')+(assist?' ← '+assist:'')+' (hors-jeu / erreur)',
+    minute:minute,
+    seconds:st.seconds,
+    period:st.period
+  });
+
+  editingGoalEventIndex=null;
+  closePanels();
+  persist('cancel-goal',true);
   render();
 });
 
